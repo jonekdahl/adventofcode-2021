@@ -1,1 +1,1 @@
-# Advent of code 2021 - solutions in Ruby
+# Advent of code 2021 - solutions in F#
