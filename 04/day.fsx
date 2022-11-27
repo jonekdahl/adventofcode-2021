@@ -6,11 +6,12 @@ let lines =
 let numbers = lines[0].Split "," |> Array.map int
 
 
-type Board = int[][]
+type Board = int[,]
 
 let parseBoard (boardLines: string[]): Board =
     boardLines
     |> Array.map (fun s -> s.Split(" ", StringSplitOptions.RemoveEmptyEntries) |> Array.map int)
+    |> array2D
 
 let boards = 
     lines[1..]
@@ -22,10 +23,10 @@ let boards =
 let boardHasBingo (isDrawn: int -> bool) (board: Board) =
     let rows =
         seq { for r in 0..4 do
-                            yield board[r] }
+                            yield board[r,*] }
     let columns =
         seq { for c in 0..4 do
-                            yield [| board[0][c]; board[1][c] ; board[2][c] ; board[3][c] ; board[4][c] |] }
+                            yield board[*,c] }
     let hasBingo (numbers: int[]) = numbers |> Seq.forall isDrawn
 
     Seq.append rows columns
@@ -50,8 +51,9 @@ let findWinningBoard =
     winningBoard.Value, numbersDrawn
 
 let sumUnmarked (isDrawn: int -> bool) (board: Board): int =
-    board
-    |> Array.sumBy (fun row -> row |> Array.sumBy (fun num -> if isDrawn num then 0 else num))
+    let mutable sum = 0
+    Array2D.iter (fun num -> if not (isDrawn num) then sum <- sum + num) board
+    sum
 
 let winningBoard, numbersDrawn = findWinningBoard
 let score = (sumUnmarked (isDrawn numbersDrawn) winningBoard) * (Array.last numbersDrawn)
